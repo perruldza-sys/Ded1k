@@ -755,6 +755,8 @@ if (m.isGroup) {
     } catch (err) {
         isAdmin = false;
         isBotAdmin = false;
+        if (!global.db.autogroup) global.db.autogroup = {}
+if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {}
     }
 }
 
