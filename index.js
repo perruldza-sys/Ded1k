@@ -68,6 +68,22 @@ server.listen(PORT, () => {
 	* Whatsapp : https://whatsapp.com/channel/0029VaWOkNm7DAWtkvkJBK43
 */
 
+// ================= AUTO OPEN / AUTO CLOSE SCHEDULER =================
+function scheduleDaily(time, callback) {
+    const [hour, minute] = time.split(':').map(Number);
+    const now = new Date();
+    const target = new Date();
+
+    target.setHours(hour, minute, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1);
+
+    const delay = target - now;
+    setTimeout(() => {
+        callback();
+        setInterval(callback, 24 * 60 * 60 * 1000);
+    }, delay);
+}
+
 async function startNazeBot() {
 	const { state, saveCreds } = await useMultiFileAuthState('nazedev');
 	const { version, isLatest } = await fetchLatestBaileysVersion();
@@ -231,6 +247,36 @@ async function startNazeBot() {
 		if (connection == 'open') {
 			console.log('Connected to : ' + JSON.stringify(naze.user, null, 2));
 			let botNumber = await naze.decodeJid(naze.user.id);
+		// ========== AUTO OPEN / AUTO CLOSE (MODE 1 PER GRUP) ==========
+
+// fungsi mengambil semua grup yg aktif
+function getActiveAutoGroups() {
+    return Object.keys(global.db.autogroup || {});
+}
+
+scheduleDaily(global.autoGroup.open, async () => {
+    let groups = getActiveAutoGroups();
+    for (let id of groups) {
+        try {
+            await naze.groupSettingUpdate(id, "not_announcement");
+            await naze.sendMessage(id, { text: "🔓 Grup dibuka otomatis." });
+            console.log("Open:", id);
+        } catch {}
+    }
+});
+
+scheduleDaily(global.autoGroup.close, async () => {
+    let groups = getActiveAutoGroups();
+    for (let id of groups) {
+        try {
+            await naze.groupSettingUpdate(id, "announcement");
+            await naze.sendMessage(id, { text: "🔐 Grup ditutup otomatis." });
+            console.log("Close:", id);
+        } catch {}
+    }
+});
+
+// ==============================================================
 			if (global.db?.set[botNumber] && !global.db?.set[botNumber]?.join) {
 				if (my.ch.length > 0 && my.ch.includes('@newsletter')) {
 					if (my.ch) await naze.newsletterMsg(my.ch, { type: 'follow' }).catch(e => {})

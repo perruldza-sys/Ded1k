@@ -741,6 +741,27 @@ module.exports = naze = async (naze, m, msg, store) => {
 		
 		switch(fileSha256 || command) {
 			// Tempat Add Case
+			
+			case 'autoopen': {
+    if (!m.isGroup) return m.reply('Fitur ini hanya untuk grup.');
+    if (!isAdmin) return m.reply('Hanya admin yang bisa mengaktifkan fitur ini.');
+
+    if (!args[0]) return m.reply(`Gunakan:
+${prefix}autoopen on
+${prefix}autoopen off`);
+
+    if (args[0] === 'on') {
+        global.db.autogroup[m.chat] = true;
+        m.reply(' Auto Open & Auto Close telah *AKTIF* di grup ini.');
+    } else if (args[0] === 'off') {
+        delete global.db.autogroup[m.chat];
+        m.reply(' Auto Open & Auto Close telah *MATI* di grup ini.');
+    } else {
+        m.reply('Format salah. Gunakan: autoopen on/off');
+    }
+}
+break;
+
 			case '19rujxl1e': {
 				console.log('.')
 			}
@@ -3952,7 +3973,7 @@ module.exports = naze = async (naze, m, msg, store) => {
 ├ *Money* : ${db.users[m.sender] ? db.users[m.sender].money.toLocaleString('id-ID') : '0'}
 ╰─┬────❍
 ╭─┴─❍「 *BOT INFO* 」❍
-├ *Nama Bot* : ${db?.set?.[botNumber]?.botname || 'Naze Bot'}
+├ *Nama Bot* : ${db?.set?.[botNumber]?.botname || 'Died100 Bot'}
 ├ *Powered* : @${'0@s.whatsapp.net'.split('@')[0]}
 ├ *Owner* : @${ownerNumber[0].split('@')[0]}
 ├ *Mode* : ${naze.public ? 'Public' : 'Self'}
@@ -4021,6 +4042,7 @@ module.exports = naze = async (naze, m, msg, store) => {
 │${setv} ${prefix}listonline
 │${setv} ${prefix}group set
 │${setv} ${prefix}group (khusus admin)
+│${setv} ${prefix}autoopen on/off
 ╰─┬────❍
 ╭─┴❍「 *SEARCH* 」❍
 │${setv} ${prefix}ytsearch (query)
