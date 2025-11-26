@@ -737,8 +737,27 @@ module.exports = naze = async (naze, m, msg, store) => {
 			user.afkTime = -1
 			user.afkReason = ''
 		}
-		
-		
+
+// Cek Admin & Bot Admin
+let groupAdmins = [];
+let isAdmin = false;
+let isBotAdmin = false;
+
+if (m.isGroup) {
+    try {
+        const metadata = await naze.groupMetadata(m.chat);
+        groupAdmins = metadata.participants
+            .filter(v => v.admin !== null)
+            .map(v => v.id);
+
+        isAdmin = groupAdmins.includes(m.sender);
+        isBotAdmin = groupAdmins.includes(botNumber);
+    } catch (err) {
+        isAdmin = false;
+        isBotAdmin = false;
+    }
+}
+
 		switch(fileSha256 || command) {
 			// Tempat Add Case
 			
