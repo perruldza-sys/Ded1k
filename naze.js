@@ -68,7 +68,7 @@ setInterval(async () => {
         
         if (!data) continue;
         if (!data.open) continue;
-        if (data.time !== now) continue;
+        if (data.openTime !== now) continue;
 
         try {
             await naze.groupSettingUpdate(id, { announcement: false }); // buka grup
@@ -814,9 +814,9 @@ if (!global.db.autogroup[m.chat]) {
     global.db.autogroup[m.chat] = {
         id: m.chat,
         open: false,
-        openTime: null,
-        close: false,
-        closeTime: null
+openTime: null,
+close: false,
+closeTime: null,
     };
 }
 
