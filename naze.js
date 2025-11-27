@@ -4671,9 +4671,6 @@ break;
 // AUTO OPEN & AUTO CLOSE
 // ======================
 
-// Pastikan moment ada
-const moment = require('moment-timezone');
-
 // Inisialisasi DB kalau belum
 if (!global.db.autogroup) global.db.autogroup = {};
 
