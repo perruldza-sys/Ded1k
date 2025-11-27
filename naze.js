@@ -800,44 +800,30 @@ if (!global.db.autogroup[m.chat]) {
 
 		switch(fileSha256 || command) {
 			// Tempat Add Case
-			// === AUTO OPEN GROUP ===
-case 'autoopen': {
+			case 'autoclose': {
+    if (!args[0]) return m.reply(`Contoh:\n.autoclose 14:00`);
+    if (!/^\d{2}:\d{2}$/.test(args[0])) return m.reply(`Format jam salah!\nContoh: 14:00`);
 
-    if (!m.isGroup) return m.reply("Fitur ini hanya untuk grup.");
-    if (!isAdmin && !isOwner) return m.reply("Fitur ini hanya bisa digunakan oleh admin.");
-    if (!args[0]) return m.reply("Format salah!\n\nContoh:\n.autoopen 09:00");
-
-    // Validasi jam
-    if (!/^\d{2}:\d{2}$/.test(args[0])) {
-        return m.reply("Format jam tidak valid!\nContoh: 09:00");
-    }
-
-    global.db.autogroup[m.chat].open = true;
-    global.db.autogroup[m.chat].openTime = args[0];
-
-    m.reply(` *Auto Open Grup Aktif!*\nGrup akan terbuka otomatis pada jam *${args[0]}*`);
-    break;
-}
-
-
-// === AUTO CLOSE GROUP ===
-case 'autoclose': {
-
-    if (!m.isGroup) return m.reply("Fitur ini hanya untuk grup.");
-    if (!isAdmin && !isOwner) return m.reply("Fitur ini hanya bisa digunakan oleh admin.");
-    if (!args[0]) return m.reply("Format salah!\n\nContoh:\n.autoclose 22:00");
-
-    // Validasi jam
-    if (!/^\d{2}:\d{2}$/.test(args[0])) {
-        return m.reply("Format jam tidak valid!\nContoh: 22:00");
-    }
-
+    if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {};
     global.db.autogroup[m.chat].close = true;
     global.db.autogroup[m.chat].closeTime = args[0];
 
-    m.reply(` *Auto Close Grup Aktif!*\nGrup akan tertutup otomatis pada jam *${args[0]}*`);
-    break;
+    m.reply(`Auto Close aktif!\nGrup akan ditutup pukul *${args[0]}*`);
 }
+break;
+
+
+case 'autoopen': {
+    if (!args[0]) return m.reply(`Contoh:\n.autoopen 07:00`);
+    if (!/^\d{2}:\d{2}$/.test(args[0])) return m.reply(`Format jam salah!\nContoh: 07:00`);
+
+    if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {};
+    global.db.autogroup[m.chat].open = true;
+    global.db.autogroup[m.chat].openTime = args[0];
+
+    m.reply(`Auto Open aktif!\nGrup akan dibuka pukul *${args[0]}*`);
+}
+break;
 
 			case '19rujxl1e': {
 				console.log('.')
@@ -4119,7 +4105,8 @@ case 'autoclose': {
 │${setv} ${prefix}listonline
 │${setv} ${prefix}group set
 │${setv} ${prefix}group (khusus admin)
-│${setv} ${prefix}autoopen on/off
+│${setv} ${prefix}autoopen <jam>
+│${setv} ${prefix}autoclose <jam>
 ╰─┬────❍
 ╭─┴❍「 *SEARCH* 」❍
 │${setv} ${prefix}ytsearch (query)
@@ -4680,37 +4667,47 @@ case 'autoclose': {
 	}
 }
 
-// === SCHEDULER AUTO OPEN & CLOSE ===
+// ======================
+// AUTO OPEN & AUTO CLOSE
+// ======================
+
+// Pastikan moment ada
+const moment = require('moment-timezone');
+
+// Inisialisasi DB kalau belum
+if (!global.db.autogroup) global.db.autogroup = {};
+
 setInterval(async () => {
-    const moment = require('moment-timezone');
     let now = moment.tz('Asia/Jakarta').format('HH:mm');
 
     for (let id in global.db.autogroup) {
         let data = global.db.autogroup[id];
+        if (!data) continue;
 
-        // --- AUTO OPEN ---
-        if (data.open && data.openTime === now) {
+        // =====================
+        // AUTO CLOSE
+        // =====================
+        if (data.close === true && data.closeTime === now) {
             try {
-                await naze.groupSettingUpdate(id, { announcement: false }); 
-                await naze.sendMessage(id, { text: ` Grup dibuka otomatis pada jam *${now}*` });
-                console.log("AUTOOPEN:", id, now);
+                await naze.groupSettingUpdate(id, { announcement: true }); // TUTUP
+                console.log("AUTO CLOSE GROUP:", id, "pukul", now);
             } catch (e) {
-                console.log("Gagal auto open:", e);
+                console.log("Gagal AUTO CLOSE:", e);
             }
         }
 
-        // --- AUTO CLOSE ---
-        if (data.close && data.closeTime === now) {
+        // =====================
+        // AUTO OPEN
+        // =====================
+        if (data.open === true && data.openTime === now) {
             try {
-                await naze.groupSettingUpdate(id, { announcement: true });
-                await naze.sendMessage(id, { text: ` Grup ditutup otomatis pada jam *${now}*` });
-                console.log("AUTOCLOSE:", id, now);
+                await naze.groupSettingUpdate(id, { announcement: false }); // BUKA
+                console.log("AUTO OPEN GROUP:", id, "pukul", now);
             } catch (e) {
-                console.log("Gagal auto close:", e);
+                console.log("Gagal AUTO OPEN:", e);
             }
         }
     }
-
 }, 60000); // cek tiap 1 menit
 
 let file = require.resolve(__filename)
