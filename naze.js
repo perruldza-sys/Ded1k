@@ -4691,8 +4691,9 @@ setInterval(async () => {
         // --- AUTO OPEN ---
         if (data.open && data.openTime === now) {
             try {
-                await naze.groupSettingUpdate(id, { announcement: false }); // buka grup
+                await naze.groupSettingUpdate(id, { announcement: false }); 
                 await naze.sendMessage(id, { text: ` Grup dibuka otomatis pada jam *${now}*` });
+                console.log("AUTOOPEN:", id, now);
             } catch (e) {
                 console.log("Gagal auto open:", e);
             }
@@ -4701,13 +4702,15 @@ setInterval(async () => {
         // --- AUTO CLOSE ---
         if (data.close && data.closeTime === now) {
             try {
-                await naze.groupSettingUpdate(id, { announcement: true }); // tutup grup
+                await naze.groupSettingUpdate(id, { announcement: true });
                 await naze.sendMessage(id, { text: ` Grup ditutup otomatis pada jam *${now}*` });
+                console.log("AUTOCLOSE:", id, now);
             } catch (e) {
                 console.log("Gagal auto close:", e);
             }
         }
     }
+
 }, 60000); // cek tiap 1 menit
 
 let file = require.resolve(__filename)
