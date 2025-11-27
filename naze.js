@@ -79,6 +79,28 @@ setInterval(async () => {
     }
 }, 60000); // cek tiap 1 menit
 
+// AUTO CLOSE GROUP SCHEDULER
+setInterval(async () => {
+    if (!global.db.autogroup) return;
+
+    let now = moment.tz('Asia/Jakarta').format('HH:mm');
+
+    for (const id in global.db.autogroup) {
+        let data = global.db.autogroup[id];
+        if (!data) continue;
+        if (!data.close) continue;
+
+        if (data.closeTime === now) {
+            try {
+                await naze.groupSettingUpdate(id, { announcement: true });
+                console.log("Auto Close Group:", id, "pada jam", now);
+            } catch (e) {
+                console.log("Gagal auto close:", e);
+            }
+        }
+    }
+}, 60000); // cek tiap 1 menit
+
 module.exports = naze = async (naze, m, msg, store) => {
 	const botNumber = naze.decodeJid(naze.user.id);
 	const ownerNumber = db?.set?.[botNumber]?.owner?.map(x => x.id) || owner;
@@ -801,6 +823,8 @@ if (!global.db.autogroup[m.chat]) {
 		switch(fileSha256 || command) {
 			// Tempat Add Case
 			case 'autoclose': {
+    if (!m.isGroup) return m.reply("Fitur ini hanya bisa dalam grup!");
+
     if (!args[0]) return m.reply(`Contoh:\n.autoclose 14:00`);
     if (!/^\d{2}:\d{2}$/.test(args[0])) return m.reply(`Format jam salah!\nContoh: 14:00`);
 
@@ -814,6 +838,8 @@ break;
 
 
 case 'autoopen': {
+    if (!m.isGroup) return m.reply("Fitur ini hanya bisa dalam grup!");
+
     if (!args[0]) return m.reply(`Contoh:\n.autoopen 07:00`);
     if (!/^\d{2}:\d{2}$/.test(args[0])) return m.reply(`Format jam salah!\nContoh: 07:00`);
 
