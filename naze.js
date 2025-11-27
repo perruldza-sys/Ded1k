@@ -7,6 +7,10 @@ process.on('unhandledRejection', console.error)
 	* Whatsapp : https://whatsapp.com/channel/0029VaWOkNm7DAWtkvkJBK43
 */
 
+// BAGIAN 1
+if (!global.db) global.db = {};
+if (!global.db.autogroup) global.db.autogroup = {};
+
 require('./settings');
 const fs = require('fs');
 const os = require('os');
@@ -762,7 +766,14 @@ if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {}
 
 		switch(fileSha256 || command) {
 			// Tempat Add Case
-			
+			if (!global.db.autogroup[m.chat]) {
+    global.db.autogroup[m.chat] = {
+        id: m.chat,
+        open: false,
+        time: ''
+    };
+}
+
 			case 'autoopen': {
     if (!m.isGroup) return m.reply('Fitur ini hanya untuk grup.');
     if (!isAdmin) return m.reply('Hanya admin yang bisa mengaktifkan fitur ini.');
