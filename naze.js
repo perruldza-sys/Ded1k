@@ -764,16 +764,17 @@ if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {}
     }
 }
 
-		switch(fileSha256 || command) {
-			// Tempat Add Case
-			if (!global.db.autogroup[m.chat]) {
+// BAGIAN 2 – FIX autogroup
+if (!global.db.autogroup) global.db.autogroup = {};
+if (!global.db.autogroup[m.chat]) {
     global.db.autogroup[m.chat] = {
         id: m.chat,
-        open: false,
-        time: ''
+        open: false
     };
 }
 
+		switch(fileSha256 || command) {
+			// Tempat Add Case
 			case 'autoopen': {
     if (!m.isGroup) return m.reply('Fitur ini hanya untuk grup.');
     if (!isAdmin) return m.reply('Hanya admin yang bisa mengaktifkan fitur ini.');
