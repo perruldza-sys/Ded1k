@@ -57,49 +57,6 @@ const { rdGame, iGame, tGame, gameSlot, gameCasinoSolo, gameSamgongSolo, gameMer
 const { pinterest, wallpaper, remini, wikimedia, hitamkan, yanzGpt, mediafireDl, ringtone, styletext, instagramDl, tiktokDl, facebookDl, instaStalk, telegramStalk, tiktokStalk, genshinStalk, instaStory, bk9Ai, spotifyDl, ytMp4, ytMp3, NvlGroup, quotedLyo, youSearch, gptLogic, savetube, simi, geminiAi } = require('./lib/screaper');
 const { unixTimestampSeconds, generateMessageTag, processTime, webApi, getRandom, getBuffer, fetchJson, runtime, clockString, sleep, isUrl, getTime, formatDate, formatp, jsonformat, reSize, toHD, logic, generateProfilePicture, bytesToSize, errorCache, normalize, getSizeMedia, parseMention, getGroupAdmins, readFileTxt, readFileJson, getHashedPassword, generateAuthToken, cekMenfes, generateToken, batasiTeks, randomText, isEmoji, getTypeUrlMedia, pickRandom, convertTimestampToDate, getAllHTML, tarBackup } = require('./lib/function');
 
-// AUTO OPEN GROUP SCHEDULER
-setInterval(async () => {
-    if (!global.db.autogroup) return;
-
-    let now = moment.tz('Asia/Jakarta').format('HH:mm');
-
-    for (const id in global.db.autogroup) {
-        let data = global.db.autogroup[id];
-        
-        if (!data) continue;
-        if (!data.open) continue;
-        if (data.openTime !== now) continue;
-
-        try {
-            await naze.groupSettingUpdate(id, { announcement: false }); // buka grup
-            console.log("Auto Open Group:", id, "pada jam", now);
-        } catch (e) {
-            console.log("Gagal auto buka grup:", e);
-        }
-    }
-}, 60000); // cek tiap 1 menit
-
-// AUTO CLOSE GROUP SCHEDULER
-setInterval(async () => {
-    if (!global.db.autogroup) return;
-
-    let now = moment.tz('Asia/Jakarta').format('HH:mm');
-
-    for (const id in global.db.autogroup) {
-        let data = global.db.autogroup[id];
-        if (!data) continue;
-        if (!data.close) continue;
-
-        if (data.closeTime === now) {
-            try {
-                await naze.groupSettingUpdate(id, { announcement: true });
-                console.log("Auto Close Group:", id, "pada jam", now);
-            } catch (e) {
-                console.log("Gagal auto close:", e);
-            }
-        }
-    }
-}, 60000); // cek tiap 1 menit
 
 module.exports = naze = async (naze, m, msg, store) => {
 	const botNumber = naze.decodeJid(naze.user.id);
@@ -809,6 +766,7 @@ if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {}
 }
 
 // ===== INIT AUTOGROUP =====
+if (!global.db) global.db = {};
 if (!global.db.autogroup) global.db.autogroup = {};
 
 		switch(fileSha256 || command) {
@@ -823,8 +781,10 @@ case 'autoopen': {
 
     if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {};
 
-    global.db.autogroup[m.chat].open = true;
-    global.db.autogroup[m.chat].openTime = jam;
+    // dalam case 'autoopen'
+global.db.autogroup[m.chat].open = true;
+global.db.autogroup[m.chat].openTime = jam;
+console.log(`[AUTOOPEN SET] ${m.chat} -> ${jam}`);
 
     m.reply(`Auto Open aktif.\nGrup akan dibuka otomatis pukul *${jam}*`);
 }
@@ -841,8 +801,10 @@ case 'autoclose': {
 
     if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {};
 
-    global.db.autogroup[m.chat].close = true;
-    global.db.autogroup[m.chat].closeTime = jam;
+    // dalam case 'autoclose'
+global.db.autogroup[m.chat].close = true;
+global.db.autogroup[m.chat].closeTime = jam;
+console.log(`[AUTOCLOSE SET] ${m.chat} -> ${jam}`);
 
     m.reply(`Auto Close aktif.\nGrup akan ditutup otomatis pukul *${jam}*`);
 }
@@ -4691,7 +4653,7 @@ break;
 }
 
 // ============ AUTO OPEN & AUTO CLOSE SCHEDULER ============
-const moment = require('moment-timezone'); // pastikan tidak double require
+// pastikan tidak double require
 
 setInterval(async () => {
     try {
@@ -4740,4 +4702,5 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 });
+
 
