@@ -4654,8 +4654,6 @@ break;
 
 
 // ================= SCHEDULER AUTO OPEN & CLOSE =================
-const moment = require('moment-timezone');
-
 setInterval(async () => {
     try {
         if (!global.db.autogroup) return;
@@ -4709,6 +4707,7 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 });
+
 
 
 
