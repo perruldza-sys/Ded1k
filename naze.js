@@ -4652,27 +4652,6 @@ break;
 	}
 }
 
-// ================= FIX GROUP SETTING =================
-naze.groupSettingUpdate = async (id, options) => {
-    try {
-        // format Baileys terbaru (WAJIB)
-        return await naze.groupSettingUpdate(id, options);
-    } catch (e) {
-        console.log("⛔ Baileys builtin gagal, pakai fallback.");
-
-        try {
-            // fallback yang kompatibel
-            await naze.sendMessage(id, {
-                groupSetting: options
-            });
-
-            return true;
-        } catch (err) {
-            console.log("❌ FATAL: groupSettingUpdate gagal total:", err);
-        }
-    }
-};
-
 
 // ================= SCHEDULER AUTO OPEN & CLOSE =================
 const moment = require('moment-timezone');
@@ -4703,6 +4682,26 @@ setInterval(async () => {
         console.log("[AUTOGROUP ERROR]", err);
     }
 }, 60000);
+
+// ================= FIX GROUP SETTING =================
+naze.groupSettingUpdate = async (id, setting) => {
+    try {
+        // built-in Baileys (kalau tersedia)
+        return await naze.groupSettingUpdate(id, setting);
+    } catch (e) {
+        console.log("⛔ Built-in gagal, fallback...");
+
+        try {
+            await naze.sendMessage(id, {
+                groupSetting: setting
+            });
+            return true;
+
+        } catch (err) {
+            console.log("❌ groupSettingUpdate gagal total:", err);
+        }
+    }
+};
 let file = require.resolve(__filename)
 fs.watchFile(file, () => {
 	fs.unwatchFile(file)
@@ -4710,6 +4709,7 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 });
+
 
 
 
