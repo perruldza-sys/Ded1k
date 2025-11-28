@@ -4652,6 +4652,45 @@ break;
 	}
 }
 
+// ========== FIX UNTUK groupSettingUpdate ==========
+naze.groupSettingUpdate = async (jid, setting) => {
+    /*
+        setting contoh:
+        - { announcement: true }   → tutup grup (hanya admin yang bisa kirim pesan)
+        - { announcement: false }  → buka grup (semua anggota bisa kirim pesan)
+
+        Beberapa versi Baileys TIDAK memiliki fungsi groupSettingUpdate bawaan,
+        jadi kita buat fungsi manual agar autoopen/autoclose tetap bekerja.
+    */
+
+    try {
+        // Jika fungsi bawaan Baileys tersedia, gunakan itu
+        if (typeof naze.groupSettingUpdate === "function") {
+            return await naze.groupSettingUpdate(jid, setting);
+        }
+    } catch (e) {
+        console.log("⚠ Error built-in groupSettingUpdate, fallback to manual mode");
+    }
+
+    // Fallback manual jika fungsi bawaan tidak tersedia
+    return await naze.query({
+        tag: 'iq',
+        attrs: {
+            to: jid,
+            type: 'set',
+            xmlns: 'w:g2'
+        },
+        content: [{
+            tag: 'group',
+            attrs: {
+                // "allow: all" = buka grup, "allow: admins" = tutup grup
+                allow: setting.announcement === false ? 'all' : 'admins'
+            }
+        }]
+    });
+};
+// ========== END FIX ==========
+
 // ============ AUTO OPEN & AUTO CLOSE SCHEDULER ============
 // pastikan tidak double require
 
@@ -4702,5 +4741,6 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 });
+
 
 
