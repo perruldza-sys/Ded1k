@@ -93,10 +93,10 @@ module.exports = naze = async (naze, m, msg, store) => {
 		const qmsg = (quoted.msg || quoted)
 		const author = db?.set?.[botNumber]?.author || 'Nazedev';
 		const packname = db?.set?.[botNumber]?.packname || 'Bot WhatsApp';
-		const hari = moment.tz('Asia/Jakarta').locale('id').format('dddd');
-		const tanggal = moment.tz('Asia/Jakarta').locale('id').format('DD/MM/YYYY');
-		const jam = moment.tz('Asia/Jakarta').locale('id').format('HH:mm:ss');
-		const ucapanWaktu = jam < '05:00:00' ? 'Selamat Pagi 🌉' : jam < '11:00:00' ? 'Selamat Pagi 🌄' : jam < '15:00:00' ? 'Selamat Siang 🏙' : jam < '18:00:00' ? 'Selamat Sore 🌅' : jam < '19:00:00' ? 'Selamat Sore 🌃' : jam < '23:59:00' ? 'Selamat Malam 🌌' : 'Selamat Malam 🌌';
+		const hari = moment.tz('Asia/Makassar').locale('id').format('dddd');
+		const tanggal = moment.tz('Asia/Makassar').locale('id').format('DD/MM/YYYY');
+		const jam = moment.tz('Asia/Makassar').locale('id').format('HH:mm:ss');
+		const ucapanWaktu = jam < '05:00:00' ? 'Selamat Subuh 🌉' : jam < '11:59:00' ? 'Selamat Pagi 🌄' : jam < '14:59:00' ? 'Selamat Siang 🏙' : jam < '18:00:00' ? 'Selamat Sore 🌅' : jam < '19:00:00' ? 'Selamat Menjelang Maghrib 🌃' : jam < '23:59:00' ? 'Selamat Malam 🌌' : 'Selamat Malam 🌌';
 		const almost = 0.72
 		const time = Date.now()
 		const time_now = new Date()
@@ -183,7 +183,7 @@ module.exports = naze = async (naze, m, msg, store) => {
 			}
 		}, {
 			scheduled: true,
-			timezone: 'Asia/Jakarta'
+			timezone: 'Asia/Makassar'
 		});
 		
 		// Auto Set Bio
@@ -323,10 +323,10 @@ module.exports = naze = async (naze, m, msg, store) => {
 		
 		// Waktu Sholat
 		const jadwalSholat = {
-			Subuh: '04:30',
-			Dzuhur: '12:06',
-			Ashar: '15:21',
-			Maghrib: '18:08',
+			Subuh: '04:00',
+			Dzuhur: '11:40',
+			Ashar: '14:50',
+			Maghrib: '18:00',
 			Isya: '19:00'
 		}
 		if (!this.intervalSholat) this.intervalSholat = null;
@@ -334,7 +334,7 @@ module.exports = naze = async (naze, m, msg, store) => {
 		if (this.intervalSholat) clearInterval(this.intervalSholat); 
 		setTimeout(() => {
 			this.intervalSholat = setInterval(async() => {
-				const sekarang = moment.tz('Asia/Jakarta');
+				const sekarang = moment.tz('Asia/Makassar');
 				const jamSholat = sekarang.format('HH:mm');
 				const hariIni = sekarang.format('YYYY-MM-DD');
 				const detik = sekarang.format('ss');
@@ -344,7 +344,7 @@ module.exports = naze = async (naze, m, msg, store) => {
 						this.waktusholat[sholat] = hariIni
 						for (const [idnya, settings] of Object.entries(db.groups)) {
 							if (settings.waktusholat) {
-								await naze.sendMessage(idnya, { text: `Waktu *${sholat}* telah tiba, ambilah air wudhu dan segeralah shalat🙂.\n\n*${waktu.slice(0, 5)}*\n_untuk wilayah Jakarta dan sekitarnya._` }, { ephemeralExpiration: m.expiration || store?.messages[idnya]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 }).catch(e => {})
+								await naze.sendMessage(idnya, { text: `Waktu *${sholat}* telah tiba, ambilah air wudhu dan segeralah shalat🙂.\n\n*${waktu.slice(0, 5)}*\n_untuk wilayah Makassar dan sekitarnya._` }, { ephemeralExpiration: m.expiration || store?.messages[idnya]?.array?.slice(-1)[0]?.metadata?.ephemeralDuration || 0 }).catch(e => {})
 							}
 						}
 					}
@@ -1027,7 +1027,7 @@ break;
 					} catch (e) {
 						metadata = (store.groupMetadata[i] = await naze.groupMetadata(i).catch(e => ({})))
 					}
-					teks += metadata?.subject ? `${setv} *Nama :* ${metadata.subject}\n${setv} *Admin :* ${metadata.owner ? `@${metadata.owner.split('@')[0]}` : '-' }\n${setv} *ID :* ${metadata.id}\n${setv} *Dibuat :* ${moment(metadata.creation * 1000).tz('Asia/Jakarta').format('DD/MM/YYYY HH:mm:ss')}\n${setv} *Member :* ${metadata.participants.length}\n\n=====================\n\n` : ''
+					teks += metadata?.subject ? `${setv} *Nama :* ${metadata.subject}\n${setv} *Admin :* ${metadata.owner ? `@${metadata.owner.split('@')[0]}` : '-' }\n${setv} *ID :* ${metadata.id}\n${setv} *Dibuat :* ${moment(metadata.creation * 1000).tz('Asia/Makassar').format('DD/MM/YYYY HH:mm:ss')}\n${setv} *Member :* ${metadata.participants.length}\n\n=====================\n\n` : ''
 				}
 				await m.reply(teks)
 			}
@@ -2213,7 +2213,7 @@ break;
 			}
 			break
 			case 'cuaca': case 'weather': {
-				if (!text) return m.reply(`Example: ${prefix + command} jakarta`)
+				if (!text) return m.reply(`Example: ${prefix + command} makassar`)
 				try {
 					let data = await fetchJson(`https://api.openweathermap.org/data/2.5/weather?q=${text}&units=metric&appid=060a6bcfa19809c2cd4d97a212b19273&language=en`)
 					m.reply(`*🏙 Cuaca Kota ${data.name}*\n\n*🌤️ Cuaca :* ${data.weather[0].main}\n*📝 Deskripsi :* ${data.weather[0].description}\n*🌡️ Suhu Rata-rata :* ${data.main.temp} °C\n*🤔 Terasa Seperti :* ${data.main.feels_like} °C\n*🌬️ Tekanan :* ${data.main.pressure} hPa\n*💧 Kelembapan :* ${data.main.humidity}%\n*🌪️ Kecepatan Angin :* ${data.wind.speed} Km/h\n*📍Lokasi :*\n- *Bujur :* ${data.coord.lat}\n- *Lintang :* ${data.coord.lon}\n*🌏 Negara :* ${data.sys.country}`)
@@ -4659,7 +4659,7 @@ setInterval(async () => {
     try {
         if (!global.db.autogroup) return;
 
-        let now = moment.tz('Asia/Jakarta').format('HH:mm');
+        let now = moment.tz('Asia/Makassar').format('HH:mm');
 
         for (const id in global.db.autogroup) {
             let set = global.db.autogroup[id];

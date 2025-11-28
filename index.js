@@ -56,7 +56,7 @@ print('Memory', `${(os.freemem()/1024/1024).toFixed(0)} MiB / ${(os.totalmem()/1
 print('Script version', `v${require('./package.json').version}`);
 print('Node.js', process.version);
 print('Baileys', `v${require('./package.json').dependencies.baileys}`);
-print('Date & Time', new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta', hour12: false }));
+print('Date & Time', new Date().toLocaleString('en-US', { timeZone: 'Asia/Makassar', hour12: false }));
 console.log(chalk.green.bold('╚' + ('═'.repeat(30))));
 server.listen(PORT, () => {
 	console.log('App listened on port', PORT);
