@@ -4681,25 +4681,32 @@ setInterval(async () => {
     }
 }, 60000);
 
-// ================= FIX GROUP SETTING =================
-naze.groupSettingUpdate = async (id, setting) => {
+// ================ FIX GROUP SETTING (AMAN) ================
+async function updateGroupSetting(id, setting) {
     try {
-        // built-in Baileys (kalau tersedia)
-        return await naze.groupSettingUpdate(id, setting);
+        await naze.query({
+            tag: 'iq',
+            attrs: {
+                type: 'set',
+                xmlns: 'w:g2',
+                to: id
+            },
+            content: [{
+                tag: 'group',
+                attrs: setting
+            }]
+        });
+
+        return true;
+
     } catch (e) {
-        console.log("⛔ Built-in gagal, fallback...");
-
-        try {
-            await naze.sendMessage(id, {
-                groupSetting: setting
-            });
-            return true;
-
-        } catch (err) {
-            console.log("❌ groupSettingUpdate gagal total:", err);
-        }
+        console.log("❌ updateGroupSetting gagal:", e);
+        return false;
     }
-};
+}
+
+naze.groupSettingUpdate = updateGroupSetting;
+
 let file = require.resolve(__filename)
 fs.watchFile(file, () => {
 	fs.unwatchFile(file)
@@ -4707,6 +4714,7 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 });
+
 
 
 
