@@ -81,11 +81,6 @@ global.APIKeys = {
 global.badWords = ['tolol','goblok','asu','pantek','kampret','ngentot','jancok','kontol','memek','lonte','anjing']
 global.chatLength = 1000
 
-global.autoGroup = {
-    open: "09:00",   // jam buka
-    close: "22:30"   // jam tutup
-}
-
 //~~~~~~~~~~~~~~~< PROCESS >~~~~~~~~~~~~~~~\\
 
 let file = require.resolve(__filename)
@@ -95,4 +90,5 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 });
+
 
