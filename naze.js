@@ -4652,26 +4652,30 @@ break;
 	}
 }
 
-// =========================================================
-//               FIX 100% AUTO OPEN / CLOSE
-// =========================================================
-
-naze.groupSettingUpdate = async (jid, setting) => {
+// ================= FIX GROUP SETTING =================
+naze.groupSettingUpdate = async (id, options) => {
     try {
-        if (setting.announcement === true) {
-            // TUTUP GRUP
-            return await naze.sendMessage(jid, { groupSettingUpdate: 'announcement' });
-        } else {
-            // BUKA GRUP
-            return await naze.sendMessage(jid, { groupSettingUpdate: 'not_announcement' });
-        }
+        // format Baileys terbaru (WAJIB)
+        return await naze.groupSettingUpdate(id, options);
     } catch (e) {
-        console.error("Error pada groupSettingUpdate:", e);
+        console.log("⛔ Baileys builtin gagal, pakai fallback.");
+
+        try {
+            // fallback yang kompatibel
+            await naze.sendMessage(id, {
+                groupSetting: options
+            });
+
+            return true;
+        } catch (err) {
+            console.log("❌ FATAL: groupSettingUpdate gagal total:", err);
+        }
     }
 };
 
-// ============ AUTO OPEN & AUTO CLOSE SCHEDULER ============
-// pastikan tidak double require
+
+// ================= SCHEDULER AUTO OPEN & CLOSE =================
+const moment = require('moment-timezone');
 
 setInterval(async () => {
     try {
@@ -4683,36 +4687,22 @@ setInterval(async () => {
             let set = global.db.autogroup[id];
             if (!set) continue;
 
-            // ====================
-            // AUTO CLOSE GROUP
-            // ====================
+            // AUTO CLOSE
             if (set.close && set.closeTime === now) {
-                try {
-                    await naze.groupSettingUpdate(id, { announcement: true });
-                    console.log("[AUTO CLOSE] Grup:", id, "pukul", now);
-                } catch (err) {
-                    console.error("[GAGAL AUTO CLOSE]", id, err);
-                }
+                await naze.groupSettingUpdate(id, { announcement: true });
+                console.log("[AUTO CLOSE]", id, now);
             }
 
-            // ====================
-            // AUTO OPEN GROUP
-            // ====================
+            // AUTO OPEN
             if (set.open && set.openTime === now) {
-                try {
-                    await naze.groupSettingUpdate(id, { announcement: false });
-                    console.log("[AUTO OPEN] Grup:", id, "pukul", now);
-                } catch (err) {
-                    console.error("[GAGAL AUTO OPEN]", id, err);
-                }
+                await naze.groupSettingUpdate(id, { announcement: false });
+                console.log("[AUTO OPEN]", id, now);
             }
         }
-
-    } catch (e) {
-        console.error("[SCHEDULER ERROR]", e);
+    } catch (err) {
+        console.log("[AUTOGROUP ERROR]", err);
     }
-}, 60000); // cek tiap 1 menit
-
+}, 60000);
 let file = require.resolve(__filename)
 fs.watchFile(file, () => {
 	fs.unwatchFile(file)
@@ -4720,6 +4710,7 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 });
+
 
 
 
