@@ -766,6 +766,18 @@ if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {}
 
 		switch(fileSha256 || command) {
 			// Tempat Add Case
+				case 'hitam': {
+    if (!quoted) return m.reply('Kirim/Reply gambar dengan caption .hitam');
+
+    let media = await quoted.download();
+    let upl = await uploadImage(media);
+
+    let url = `https://api.xteam.xyz/photo/filter/black?file=${upl}&APIKEY=${global.xteamkey}`; 
+
+    conn.sendMessage(m.chat, { image: { url }, caption: "Berhasil! Ini gambar hitamnya." }, { quoted: m });
+}
+break;
+				
 		case 'autoopen': {
     if (!isOwner && !isAdmins) return m.reply('❌ Akses ditolak!');
     if (!args[0]) return m.reply(`Gunakan:\n.autoopen 07:00`);
@@ -4657,6 +4669,7 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 });
+
 
 
 
