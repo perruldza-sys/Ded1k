@@ -7,9 +7,8 @@ process.on('unhandledRejection', console.error)
 	* Whatsapp : https://whatsapp.com/channel/0029VaWOkNm7DAWtkvkJBK43
 */
 
-// BAGIAN 1
-if (!global.db) global.db = {};
-if (!global.db.autogroup) global.db.autogroup = {};
+global.db = global.db || {};
+global.db.autogroup = global.db.autogroup || {};
 
 require('./settings');
 const fs = require('fs');
@@ -765,51 +764,29 @@ if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {}
     }
 }
 
-// ===== INIT AUTOGROUP =====
-if (!global.db) global.db = {};
-if (!global.db.autogroup) global.db.autogroup = {};
-
 		switch(fileSha256 || command) {
 			// Tempat Add Case
-			// ===== COMMAND .autoopen =====
-case 'autoopen': {
-    if (!m.isGroup) return m.reply("Fitur ini hanya untuk grup!");
+		case 'autoopen': {
+    if (!isOwner && !isAdmins) return m.reply('❌ Akses ditolak!');
+    if (!args[0]) return m.reply(`Gunakan:\n.autoopen 07:00`);
 
-    let jam = args[0];
-    if (!jam || !/^\d{2}:\d{2}$/.test(jam))
-        return m.reply("Format salah!\nContoh: .autoopen 07:00");
+    global.db.autogroup[m.chat] = global.db.autogroup[m.chat] || {};
+    global.db.autogroup[m.chat].open = args[0];
 
-    if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {};
-
-    // dalam case 'autoopen'
-global.db.autogroup[m.chat].open = true;
-global.db.autogroup[m.chat].openTime = jam;
-console.log(`[AUTOOPEN SET] ${m.chat} -> ${jam}`);
-
-    m.reply(`Auto Open aktif.\nGrup akan dibuka otomatis pukul *${jam}*`);
+    m.reply(`✅ Auto Open diset ke ${args[0]}`);
 }
 break;
 
-
-// ===== COMMAND .autoclose =====
 case 'autoclose': {
-    if (!m.isGroup) return m.reply("Fitur ini hanya untuk grup!");
+    if (!isOwner && !isAdmins) return m.reply('❌ Akses ditolak!');
+    if (!args[0]) return m.reply(`Gunakan:\n.autoclose 22:00`);
 
-    let jam = args[0];
-    if (!jam || !/^\d{2}:\d{2}$/.test(jam))
-        return m.reply("Format salah!\nContoh: .autoclose 22:00");
+    global.db.autogroup[m.chat] = global.db.autogroup[m.chat] || {};
+    global.db.autogroup[m.chat].close = args[0];
 
-    if (!global.db.autogroup[m.chat]) global.db.autogroup[m.chat] = {};
-
-    // dalam case 'autoclose'
-global.db.autogroup[m.chat].close = true;
-global.db.autogroup[m.chat].closeTime = jam;
-console.log(`[AUTOCLOSE SET] ${m.chat} -> ${jam}`);
-
-    m.reply(`Auto Close aktif.\nGrup akan ditutup otomatis pukul *${jam}*`);
+    m.reply(`🔒 Auto Close diset ke ${args[0]}`);
 }
 break;
-
 			case '19rujxl1e': {
 				console.log('.')
 			}
@@ -4654,58 +4631,24 @@ break;
 
 
 // ================= SCHEDULER AUTO OPEN & CLOSE =================
+
 setInterval(async () => {
-    try {
-        if (!global.db.autogroup) return;
+    let now = moment.tz('Asia/Jakarta').format('HH:mm');
 
-        let now = moment.tz('Asia/Makassar').format('HH:mm');
+    for (let id in global.db.autogroup) {
+        let data = global.db.autogroup[id];
 
-        for (const id in global.db.autogroup) {
-            let set = global.db.autogroup[id];
-            if (!set) continue;
-
-            // AUTO CLOSE
-            if (set.close && set.closeTime === now) {
-                await naze.groupSettingUpdate(id, { announcement: true });
-                console.log("[AUTO CLOSE]", id, now);
-            }
-
-            // AUTO OPEN
-            if (set.open && set.openTime === now) {
-                await naze.groupSettingUpdate(id, { announcement: false });
-                console.log("[AUTO OPEN]", id, now);
-            }
+        if (data.open && now === data.open) {
+            await conn.groupSettingUpdate(id, 'not_announcement');
+            await conn.sendMessage(id, { text: `✅ Grup dibuka otomatis pukul ${now}` });
         }
-    } catch (err) {
-        console.log("[AUTOGROUP ERROR]", err);
+
+        if (data.close && now === data.close) {
+            await conn.groupSettingUpdate(id, 'announcement');
+            await conn.sendMessage(id, { text: `🔒 Grup ditutup otomatis pukul ${now}` });
+        }
     }
-}, 60000);
-
-// ================ FIX GROUP SETTING (AMAN) ================
-async function updateGroupSetting(id, setting) {
-    try {
-        await naze.query({
-            tag: 'iq',
-            attrs: {
-                type: 'set',
-                xmlns: 'w:g2',
-                to: id
-            },
-            content: [{
-                tag: 'group',
-                attrs: setting
-            }]
-        });
-
-        return true;
-
-    } catch (e) {
-        console.log("❌ updateGroupSetting gagal:", e);
-        return false;
-    }
-}
-
-naze.groupSettingUpdate = updateGroupSetting;
+}, 30 * 1000);
 
 let file = require.resolve(__filename)
 fs.watchFile(file, () => {
@@ -4714,6 +4657,7 @@ fs.watchFile(file, () => {
 	delete require.cache[file]
 	require(file)
 });
+
 
 
 
